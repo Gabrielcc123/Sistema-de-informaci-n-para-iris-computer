@@ -2,41 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // Permite usarlo para Auth de Laravel
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Usuario extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     protected $table = 'usuario';
     protected $primaryKey = 'idUsuario';
 
-    public $incrementing = true;
-    protected $keyType = 'int';
-
     protected $fillable = [
         'nombre',
         'apellido',
+        'email',       // <-- AGREGAR AQUÍ
         'password',
         'telefono',
         'estado',
         'tipoAssesor',
         'tipoSupervisor',
-        'tipoTecnico'
+        'tipoTecnico',
     ];
 
-    // Oculta la contraseña por seguridad en las consultas
     protected $hidden = [
         'password',
     ];
-
-    /**
-     * Relación Uno a Muchos con Bitácora
-     */
-    public function bitacoras()
-    {
-        return $this->hasMany(Bitacora::class, 'idUsuario', 'idUsuario');
-    }
 }
