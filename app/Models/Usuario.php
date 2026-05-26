@@ -27,4 +27,29 @@ class Usuario extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    
+    /**
+ * Determina si el usuario tiene un rol específico o un conjunto de roles.
+ */
+public function hasRole(string|array $roles): bool
+{
+    // Si pasamos un array de roles, verificar si cumple con al menos uno
+    if (is_array($roles)) {
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Normalizar a minúsculas para evitar problemas de escritura
+    return match (strtolower($roles)) {
+        'administrador', 'supervisor' => (bool) $this->tipoSupervisor,
+        'vendedor', 'asesor'          => (bool) $this->tipoAssesor,
+        'técnico', 'tecnico'          => (bool) $this->tipoTecnico,
+        default                       => false,
+    };
+}
 }
