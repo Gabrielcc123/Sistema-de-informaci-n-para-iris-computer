@@ -65,8 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
-
+    //'timezone' => 'UTC',
+    'timezone' => 'America/La_Paz',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
@@ -77,6 +77,7 @@ return [
     | set to any locale for which you plan to have translation strings.
     |
     */
+    
 
     'locale' => env('APP_LOCALE', 'en'),
 

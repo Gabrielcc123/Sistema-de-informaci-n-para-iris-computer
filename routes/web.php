@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt; // <-- IMPORTANTE: Asegurar que Volt esté importado arriba
 use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\NotaVentaController;
 use App\Http\Controllers\OrdenController;
@@ -11,38 +12,47 @@ use App\Http\Controllers\OrdenController;
 |--------------------------------------------------------------------------
 */
 
-// 1. Redirección de la raíz al login (Limpieza de la portada de Laravel)
+// 1. Redirección de la raíz al login
 Route::redirect('/', '/login');
 
-// 2. Grupo de rutas protegidas globales (El usuario debe iniciar sesión)
+// 2. Grupo de rutas protegidas globales (El usuario debe estar logeado)
 Route::middleware(['auth'])->group(function () {
     
-    // Vista del Dashboard principal para todos los usuarios logeados
+    // Vista del Dashboard principal
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
     // ---------------------------------------------------------------------
-    // MÓDULO BITÁCORA: Solo el Administrador (tipoSupervisor = 1)
+    // 🛠️ RUTAS DE CONFIGURACIÓN DE PERFIL (Restauradas del Starter Kit)
+    // ---------------------------------------------------------------------
+    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+
+    // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+    // 📊 MÓDULO BITÁCORA: Solo el Administrador (tipoSupervisor = 1)
     // ---------------------------------------------------------------------
     Route::middleware(['role:supervisor'])->group(function () {
-        Route::get('/bitacora', [BitacoraController::class, 'index'])->name('bitacora.index');
+        // Quitamos el BitacoraController y usamos Volt directamente
+        Volt::route('/bitacora', 'bitacora.index')->name('bitacora.index');
     });
 
     // ---------------------------------------------------------------------
-    // MÓDULO VENTAS: Administradores y Vendedores (tipoSupervisor o tipoAssesor = 1)
+    // 💰 MÓDULO VENTAS: Administradores y Vendedores
     // ---------------------------------------------------------------------
     Route::middleware(['role:supervisor,vendedor'])->group(function () {
         Route::get('/ventas', [NotaVentaController::class, 'index'])->name('ventas.index');
     });
 
     // ---------------------------------------------------------------------
-    // MÓDULO SERVICIO TÉCNICO: Administradores y Técnicos (tipoSupervisor o tipoTecnico = 1)
+    // 🖥️ MÓDULO SERVICIO TÉCNICO: Administradores y Técnicos
     // ---------------------------------------------------------------------
     Route::middleware(['role:supervisor,tecnico'])->group(function () {
         Route::get('/ordenes', [OrdenController::class, 'index'])->name('ordenes.index');
     });
 });
 
-// 3. Carga automática de las rutas de autenticación de Livewire/Volt (login, logout, etc.)
+// 3. Carga de las rutas de autenticación de Livewire/Volt
 require __DIR__.'/auth.php';

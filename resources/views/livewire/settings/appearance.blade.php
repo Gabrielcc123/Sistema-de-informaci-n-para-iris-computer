@@ -1,19 +1,26 @@
 <?php
 
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout; // <-- 1. Importamos el layout
 
-new class extends Component {
-    //
+// 2. Forzamos el uso de tu plantilla principal
+new #[Layout('components.layouts.app')] class extends Component {
+    // No se requiere lógica de servidor aquí.
+    // Flux gestiona el tema oscuro/claro automáticamente con Alpine.js
 }; ?>
 
-<div class="flex flex-col items-start">
+<section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout heading="Appearance" subheading="Update your account's appearance settings">
-        <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
-            <flux:radio value="light" icon="sun">Light</flux:radio>
-            <flux:radio value="dark" icon="moon">Dark</flux:radio>
-            <flux:radio value="system" icon="computer-desktop">System</flux:radio>
-        </flux:radio.group>
+    <x-settings.layout heading="Apariencia" subheading="Actualiza el tema visual del sistema para adaptarlo a tu preferencia.">
+        <div class="mt-6 max-w-xl">
+            
+            <flux:radio.group x-data variant="segmented" x-model="$flux.appearance" label="Tema de la interfaz">
+                <flux:radio value="light" icon="sun">Claro</flux:radio>
+                <flux:radio value="dark" icon="moon">Oscuro</flux:radio>
+                <flux:radio value="system" icon="computer-desktop">Sistema</flux:radio>
+            </flux:radio.group>
+            
+        </div>
     </x-settings.layout>
-</div>
+</section>

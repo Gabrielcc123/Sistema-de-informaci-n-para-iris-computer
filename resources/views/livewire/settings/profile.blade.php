@@ -1,41 +1,38 @@
 <?php
 
-use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout; // <-- 1. Importamos el Atributo Layout
 
-new class extends Component {
-    public string $name = '';
+// 2. Forzamos la ruta correcta del layout
+new #[Layout('components.layouts.app')] class extends Component {
+    public string $nombre = '';
+    public string $apellido = '';
     public string $email = '';
 
-    /**
-     * Mount the component.
-     */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
+        $this->nombre = Auth::user()->nombre;
+        $this->apellido = Auth::user()->apellido;
         $this->email = Auth::user()->email;
     }
 
-    /**
-     * Update the profile information for the currently authenticated user.
-     */
     public function updateProfileInformation(): void
     {
         $user = Auth::user();
 
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-
+            'nombre' => ['required', 'string', 'max:255'],
+            'apellido' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($user->id)
+                Rule::unique(Usuario::class)->ignore($user->id),
             ],
         ]);
 
@@ -47,71 +44,56 @@ new class extends Component {
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->name);
-    }
-
-    /**
-     * Send an email verification notification to the current user.
-     */
-    public function resendVerificationNotification(): void
-    {
-        $user = Auth::user();
-
-        if ($user->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false));
-
-            return;
-        }
-
-        $user->sendEmailVerificationNotification();
-
-        Session::flash('status', 'verification-link-sent');
+        $this->dispatch('profile-updated', name: $user->nombre);
     }
 }; ?>
 
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout heading="Profile" subheading="Update your name and email address">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
+    <x-settings.layout heading="Información del Perfil" subheading="Actualice la información del perfil y la dirección de correo electrónico de su cuenta.">
+        <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
+            
+            <flux:input
+                wire:model="nombre"
+                id="nombre"
+                label="Nombre"
+                type="text"
+                name="nombre"
+                required
+                autofocus
+                autocomplete="given-name"
+            />
 
-            <div>
-                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
+            <flux:input
+                wire:model="apellido"
+                id="apellido"
+                label="Apellido"
+                type="text"
+                name="apellido"
+                required
+                autocomplete="family-name"
+            />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <p class="mt-2 text-sm text-gray-800">
-                            {{ __('Your email address is unverified.') }}
-
-                            <button
-                                wire:click.prevent="resendVerificationNotification"
-                                class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            >
-                                {{ __('Click here to re-send the verification email.') }}
-                            </button>
-                        </p>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <p class="mt-2 text-sm font-medium text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </p>
-                        @endif
-                    </div>
-                @endif
-            </div>
+            <flux:input
+                wire:model="email"
+                id="email"
+                label="Correo electrónico"
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+            />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
+                    <flux:button variant="primary" type="submit" class="w-full">Guardar</flux:button>
                 </div>
 
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
+                <x-action-message class="me-3 text-emerald-500" on="profile-updated">
+                    ¡Guardado exitosamente!
                 </x-action-message>
             </div>
         </form>
-
-        <livewire:settings.delete-user-form />
     </x-settings.layout>
 </section>
